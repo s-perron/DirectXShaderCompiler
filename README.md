@@ -1,3 +1,4 @@
+
 # DirectX Shader Compiler
 
 [![Build status](https://ci.appveyor.com/api/projects/status/6sx47j66g4dbyem9/branch/main?svg=true)](https://ci.appveyor.com/project/dnovillo/directxshadercompiler/branch/main)
