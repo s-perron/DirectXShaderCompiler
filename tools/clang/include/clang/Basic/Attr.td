@@ -1565,6 +1565,13 @@ def VKStencilRefLessEqualBack : InheritableAttr {
   let LangOpts = [SPIRV];
   let Documentation = [Undocumented];
 }
+
+def VKPerPrimitive : InheritableAttr {
+  let Spellings = [CXX11<"vk", "perprimitive">];
+  let Subjects = SubjectList<[ParmVar, Field], ErrorDiag, "ExpectedParamOrField">;
+  let LangOpts = [SPIRV];
+  let Documentation = [Undocumented];
+}
 // SPIRV Change Ends
 
 def C11NoReturn : InheritableAttr {

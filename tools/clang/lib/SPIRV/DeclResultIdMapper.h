@@ -426,6 +426,9 @@ private:
     // have been applied to a parent declaration.
     bool asNoInterp;
 
+    // True if the variable is suppose to have the PerPrimitive decoration.
+    bool isPerPrimitive;
+
     // The sigPoint is the shader stage that this variable should be added to,
     // and whether it is an input or output.
     const hlsl::SigPoint *sigPoint;

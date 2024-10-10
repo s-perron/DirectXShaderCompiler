@@ -871,7 +871,8 @@ enum AttributeDeclKind {
   // HLSL Change Begins - add attribute decl combinations
   ExpectedVariableOrParam,
   ExpectedFunctionOrParamOrField,
-  ExpectedFunctionOrVariableOrParamOrFieldOrType
+  ExpectedFunctionOrVariableOrParamOrFieldOrType,
+  ExpectedParamOrField
   // HLSL Change Ends
 };
 

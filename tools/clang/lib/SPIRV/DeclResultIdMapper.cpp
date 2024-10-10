@@ -891,7 +891,7 @@ bool DeclResultIdMapper::createStageOutputVar(const DeclaratorDecl *decl,
       storedValue == nullptr || spvContext.isGS() || spvContext.isMS();
 
   StageVarDataBundle stageVarData = {
-      decl, &inheritSemantic, false,     sigPoint,
+      decl, &inheritSemantic, false, false,     sigPoint,
       type, arraySize,        "out.var", llvm::None};
   return createStageVars(stageVarData, /*asInput=*/false, &storedValue,
                          noWriteBack);
@@ -911,7 +911,7 @@ bool DeclResultIdMapper::createStageOutputVar(const DeclaratorDecl *decl,
   SemanticInfo inheritSemantic = {};
 
   StageVarDataBundle stageVarData = {
-      decl, &inheritSemantic, false,     sigPoint,
+      decl, &inheritSemantic, false, false,    sigPoint,
       type, arraySize,        "out.var", invocationId};
   return createStageVars(stageVarData, /*asInput=*/false, &storedValue,
                          /*noWriteBack=*/false);
@@ -956,6 +956,7 @@ bool DeclResultIdMapper::createStageInputVar(const ParmVarDecl *paramDecl,
         paramDecl,
         &inheritSemantic,
         paramDecl->hasAttr<HLSLNoInterpolationAttr>(),
+        paramDecl->hasAttr<VKPerPrimitiveAttr>(),
         sigPoint,
         type,
         arraySize,
@@ -2846,6 +2847,7 @@ bool DeclResultIdMapper::createStructOutputVar(
     memberVarData.decl = field;
     memberVarData.type = field->getType();
     memberVarData.asNoInterp |= field->hasAttr<HLSLNoInterpolationAttr>();
+    memberVarData.isPerPrimitive |= field->hasAttr<VKPerPrimitiveAttr>();
     if (!createStageVars(memberVarData, false, &subValue, noWriteBack))
       return false;
   }
@@ -2879,6 +2881,7 @@ DeclResultIdMapper::createStructInputVar(const StageVarDataBundle &stageVarData,
     memberVarData.decl = field;
     memberVarData.type = field->getType();
     memberVarData.asNoInterp |= field->hasAttr<HLSLNoInterpolationAttr>();
+    memberVarData.isPerPrimitive |= field->hasAttr<VKPerPrimitiveAttr>();
     if (!createStageVars(memberVarData, true, &subValue, noWriteBack))
       return nullptr;
     subValues.push_back(subValue);
@@ -3527,6 +3530,13 @@ SpirvVariable *DeclResultIdMapper::createSpirvInterfaceVariable(
       (spvContext.isMS() && stageVarData.sigPoint->IsOutput()))
     decorateInterpolationMode(stageVarData.decl, stageVarData.type, varInstr,
                               *stageVarData.semantic);
+
+  if (stageVarData.isPerPrimitive) {
+      assert(stageVarData.sigPoint->GetSignatureKind() == hlsl::DXIL::SignatureKind::Input);
+      assert(spvContext.isPS());
+      spvBuilder.decoratePerPrimitiveNV(varInstr,
+                                        varInstr->getSourceLocation());
+  }
 
   // Special case: The DX12 SV_InstanceID always counts from 0, even if the
   // StartInstanceLocation parameter is non-zero. gl_InstanceIndex, however,

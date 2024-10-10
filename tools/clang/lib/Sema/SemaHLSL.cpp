@@ -13671,6 +13671,10 @@ void hlsl::HandleDeclAttributeForHLSL(Sema &S, Decl *D, const AttributeList &A,
         unsigned(ValidateAttributeIntArg(S, A, 1)),
         A.getAttributeSpellingListIndex());
     break;
+  case AttributeList::AT_VKPerPrimitive:
+      declAttr = ::new (S.Context) VKPerPrimitiveAttr(
+              A.getRange(), S.Context, A.getAttributeSpellingListIndex());
+          break;
   default:
     Handled = false;
     return;
